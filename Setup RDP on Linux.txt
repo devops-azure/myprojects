@@ -1,0 +1,22 @@
+To access linux machine from windows using remote desktop... enable RDP in linux
+
+Linux Redhat:
+wget http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-8.noarch.rpm
+sudo rpm -ivh epel-release-7-8.noarch.rpm
+
+cd /tmp
+wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+ls *.rpm
+sudo yum install epel-release-latest-7.noarch.rpm
+
+
+#Install X Windows and KDE
+sudo yum -y groupinstall "X Window System" "KDE Desktop"
+
+#Install and start xrdp
+sudo yum -y install xrdp 
+sudo systemctl enable xrdp
+sudo systemctl start xrdp
+
+firewall-cmd --permanent --zone=public --add-port=3389/tcp
+firewall-cmd --reload

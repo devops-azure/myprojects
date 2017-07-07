@@ -1,0 +1,64 @@
+sudo yum info haproxy
+
+sudo yum install wget gcc pcre-static pcre-devel -y
+
+wget http://www.haproxy.org/download/1.6/src/haproxy-1.6.3.tar.gz -O ~/haproxy.tar.gz
+
+tar xzvf ~/haproxy.tar.gz -C ~/
+
+cd ~/haproxy-1.6.3
+
+make TARGET=linux2628
+
+sudo make install
+
+sudo cp /usr/local/sbin/haproxy /usr/sbin/
+sudo cp ~/haproxy-1.6.3/examples/haproxy.init /etc/init.d/haproxy
+sudo chmod 755 /etc/init.d/haproxy
+
+sudo mkdir -p /etc/haproxy
+sudo mkdir -p /run/haproxy
+sudo mkdir -p /var/lib/haproxy
+sudo touch /var/lib/haproxy/stats
+
+sudo useradd -r haproxy
+
+sudo haproxy -v
+
+sudo vi /etc/haproxy/haproxy.cfg
+The configuration:
+
+global
+   log /dev/log local0
+   log /dev/log local1 notice
+   chroot /var/lib/haproxy
+   stats socket /run/haproxy/admin.sock mode 660 level admin
+   stats timeout 30s
+   user haproxy
+   group haproxy
+   daemon
+
+defaults
+   log global
+   mode http
+   option httplog
+   option dontlognull
+   timeout connect 5000
+   timeout client 50000
+   timeout server 50000
+
+frontend http_front
+   bind *:80 
+   stats uri /haproxy?stats
+   default_backend http_back
+
+backend http_back
+   balance roundrobin
+   server <server name> <private IP>:80 check
+   server <server name> <private IP>:80 check
+
+
+
+sudo systemctl restart haproxy
+/etc/init.d/haproxy restart
+
